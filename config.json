@@ -1,0 +1,31 @@
+{   
+    "USERNAME" :"Melissa.Luc@metrolinx.com",
+    "PASSWORD" :"&0z$A4eh63gg",
+    "dashboard":
+        {"gaToken":"UA-154684440-1",
+            "portal":
+                {"protocol":"https",
+                "host":"portal.viriciti.com",
+                "port":443},
+                "localisation":{
+                    "supportedLanguages":
+                        [
+                            {"value":"en",
+                            "label":"English"},
+                            {"value":"nl","label":"Nederlands"},
+                            {"value":"es","label":"Español"},
+                            {"value":"de","label":"Deutsch"},
+                            {"value":"fr","label":"Français"},
+                            {"value":"pt","label":"Português"},
+                            {"value":"he","label":"עברית"}],
+                    "api":{"version":"v1","protocol":"https","path":"/localisation/v1","host":"localisation-api","crossDomain":true,"port":443},
+                    "languages":{"load":["en","de","fr","pt"],"fallback":"en"},"cache":{"enabled":true,"age":604800000},"dev":{"debug":false,"saveMissing":false,"appendNamespaceToMissingKey":false}
+                                },
+                "mapBox":{
+                    "address":"https://api.mapbox.com/styles/v1/viriciti/ck5z65zue39t61jov8owoar8f/tiles",
+                    "APIKey":"pk.eyJ1IjoidmlyaWNpdGkiLCJhIjoiY2s0OW56OTd0MDZ0ZjNubW85bHNxb2RhdSJ9.Bf15P_oQDxydBt1upFQiSw"
+                    },
+                "env":"production",
+                "portalAddress":"https://portal.viriciti.com:443",
+                "apiKey":false}
+            }
