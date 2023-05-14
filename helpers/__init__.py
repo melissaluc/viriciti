@@ -151,7 +151,55 @@ def getAlerts ():
     query=%7B%22onGoing%22%3Atrue%7D
     """
 
+def getTimeAnalysisAPI(  vid = "adl_005",
+                    analysis_name = "analyses.energy_charged",
+                    start_dt =1672549200000,
+                    end_dt = 1683863999999,
+                    page = 1,
+                    t_step = 30,
+                    t_unit = "seconds",
+                ):
+    """
+    Function that gets data from :
+    https://dashboard.viriciti.com/reports
+    Returns listObj
 
+    https://dashboard.viriciti.com/api/v1/time/adl_004
+    ?page=1
+    &time%5Bstart%5D=1683777600000
+    &time%5Bend%5D=1683864000000
+    &time%5Bstep%5D%5B0%5D=30
+    &time%5Bstep%5D%5B1%5D=seconds
+    &time%5Btype%5D=first
+    &label=ccvs1.wheel_based_vehicle_speed
+    """
+    global cookies; baseURL; tz
+
+
+    URL_list  = [
+        f"{baseURL}v1/time/{vid}",
+        f"?page={page}",
+        f"&time%5Bstart%5D={start_dt}",
+        f"&time%5Bend%5D={end_dt}",
+        f"&time%5Bstep%5D%5B0%5D={t_step}",
+        f"&time%5Bstep%5D%5B1%5D={t_unit}",
+        f"&time%5Btype%5D=first",
+        f"&label={analysis_name}",
+        ]
+    
+    URL = "".join(URL_list)
+    print(URL)
+    data_header = {
+            "Cookie": cookies,
+            "Content-Type": "application/json; charset=utf-8"
+                }
+    
+    response = requests.get(URL, headers= data_header ,verify=False)
+    if response.status_code == 200:
+        res_json = response.json()
+        return res_json
+    else:
+        return print("Could not retreive data")
 
 
 
@@ -167,6 +215,15 @@ def getReportsAPI(  vid = "adl_005",
     Function that gets data from :
     https://dashboard.viriciti.com/reports
     Returns listObj
+
+    https://dashboard.viriciti.com/api/v1/time/adl_004
+    ?page=1
+    &time%5Bstart%5D=1683777600000
+    &time%5Bend%5D=1683864000000
+    &time%5Bstep%5D%5B0%5D=30
+    &time%5Bstep%5D%5B1%5D=seconds
+    &time%5Btype%5D=first
+    &label=ccvs1.wheel_based_vehicle_speed
     """
     global cookies; baseURL; tz
 
@@ -384,3 +441,9 @@ def getActiveFleet(fleetType=None):
         return res_json
     else:
         return print("Could not retrieve data")
+
+
+def epochConvertTime():
+    """
+    Convert epochtime to normal
+    """
