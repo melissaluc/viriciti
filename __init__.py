@@ -20,9 +20,6 @@ currentTIME = datetime.now().strftime("%H:%M:%S")
 currentHOUR = datetime.now().strftime("%H")
 currentDATE = date.today().strftime("%d/%m/%Y")
 
-# now = int((datetime.now()-timedelta(days=5)).timestamp())*(1000)
-
-
 period_int = 1
 period = "day" 
 t_res = "seconds"
@@ -79,88 +76,90 @@ analysis_keys = [
     ]
 
 analysis_dict = helpers.keys_reader("analyses.json",analysis_keys)
-vid = vid_dict.get('4001')
+# vid = vid_dict.get('4001')
 
-for key1 in analysis_dict:
-    print(f"||  {key1}  ||")
-    for key2 in analysis_dict[key1]:
-        analysis_name = analysis_dict[key1][key2]
-        print(f"--------{key2}--------")
-        resp_data = helpers.getReportsAPI(  
-                            vid,
-                            analysis_name,
-                            start_dt,
-                            end_dt,
-                            period_int,
-                            period,
-                            t_res
-                        )
-        analyses_data_list = []
-        if len(resp_data)>1:
-            data = pd.DataFrame(resp_data)
-            data["vehID"] = vid_name_dict[vid] 
-            # data[['lat','lon']] = data['value'].str.split('|',expand=True)
-            # data.drop(columns = ['value'], inplace=True)
+# for key1 in analysis_dict:
+#     print(f"||  {key1}  ||")
+#     for key2 in analysis_dict[key1]:
+#         analysis_name = analysis_dict[key1][key2]
+#         print(f"--------{key2}--------")
+#         resp_data = helpers.getReportsAPI(  
+#                             vid,
+#                             analysis_name,
+#                             start_dt,
+#                             end_dt,
+#                             period_int,
+#                             period,
+#                             t_res
+#                         )
+#         analyses_data_list = []
+#         if len(resp_data)>1:
+#             data = pd.DataFrame(resp_data)
+#             data["vehID"] = vid_name_dict[vid] 
+#             # data[['lat','lon']] = data['value'].str.split('|',expand=True)
+#             # data.drop(columns = ['value'], inplace=True)
 
-            # TODO: Testing
-            # print(data,"\n================\n")
-            # with open('analyses_data_dump.txt', 'a', encoding='utf-8') as f:
-            #     f.write(f"{str(data)}\n")
-            analyses_data_list.append(data)
-    analyses_data = pd.concat(analyses_data_list)
-    print(analyses_data)
+#             # TODO: Testing
+#             # print(data,"\n================\n")
+#             # with open('analyses_data_dump.txt', 'a', encoding='utf-8') as f:
+#             #     f.write(f"{str(data)}\n")
+#             analyses_data_list.append(data)
+#     analyses_data = pd.concat(analyses_data_list)
+#     print(analyses_data)
 
 
-# ============GET GPS per vehicle =========================
-# GET gps location for each vehicle in the fleet
-# TODO: conisder parallelism or map func vid_dict["Electric"], vid_dict["Diesel"]
+# # ============GET GPS per vehicle =========================
+# # GET gps location for each vehicle in the fleet
+# # TODO: conisder parallelism or map func vid_dict["Electric"], vid_dict["Diesel"]
 
-def getGPSdata ():
-    # Iterate for one vehicle
-    gps_data_list = []
-    page_num = 1
-    while page_num != None:
-        try: 
-            resp_data = helpers.getGPSLocation(
-                            vid_dict[vtype][vid],
-                            start_dt,
-                            end_dt = 1683777600000,
-                            page_num=page_num
-                        )
-            # print(resp_data)
-            if len(resp_data)>1:
-                data = pd.DataFrame(resp_data)
-                data["Fleet"] = vtype
-                data["vehID"] = vid 
-                data[['lat','lon']] = data['value'].str.split('|',expand=True)
-                data.drop(columns = ['value'], inplace=True)
-                gps_data_list.append(data)
-                page_num+=1
-            else:
-                page_num = None
-                break
-        except Exception as e:
-            break
+# def getGPSdata ():
+#     # Iterate for one vehicle
+#     gps_data_list = []
+#     page_num = 1
+#     while page_num != None:
+#         try: 
+#             resp_data = helpers.getGPSLocation(
+#                             vid_dict[vtype][vid],
+#                             start_dt,
+#                             end_dt = 1683777600000,
+#                             page_num=page_num
+#                         )
+#             # print(resp_data)
+#             if len(resp_data)>1:
+#                 data = pd.DataFrame(resp_data)
+#                 data["Fleet"] = vtype
+#                 data["vehID"] = vid 
+#                 data[['lat','lon']] = data['value'].str.split('|',expand=True)
+#                 data.drop(columns = ['value'], inplace=True)
+#                 gps_data_list.append(data)
+#                 page_num+=1
+#             else:
+#                 page_num = None
+#                 break
+#         except Exception as e:
+#             break
 
  
 
 
 gps_data_list = []
 for v in vid_dict:
+    print(v,"\n",vid_dict)
     page_num = 1
     while page_num != None:
         try: 
+            print(vid_dict[v])
             resp_data = helpers.getGPSLocation(
                             vid_dict[v],
                             start_dt,
                             end_dt,
                             page_num
                         )
-            # print(resp_data)
-            if len(resp_data)>1:
+            
+            if len(resp_data)>0:
                 data = pd.DataFrame(resp_data)
                 data["fleet"] = vtype
-                data["vehID"] = vid_name_dict[vid] 
+                data["vehID"] = vid_name_dict[v] 
                 data[['lat','lon']] = data['value'].str.split('|',expand=True)
                 data.drop(columns = ['value'], inplace=True)
                 gps_data_list.append(data)
@@ -180,30 +179,31 @@ gps_df = pd.concat(gps_data_list)
 gps_df["time"] = pd.to_datetime(gps_df["time"]/1000, unit='s')
 print(gps_df)
 
-time_data_list = []
-for v in vid_dict:
-    page_num = 1
-    while page_num != None:
-        try: 
-            resp_data =  helpers.getTimeAnalysisAPI(  
-                                    vid,
-                                    "ccvs1.wheel_based_vehicle_speed",
-                                    start_dt =1672549200000,
-                                    end_dt = 1683863999999,
-                                    page = page_num,
-                                    t_step = 30,
-                                    t_unit = "seconds",
-                                )
-            # print(resp_data)
-            if len(resp_data)>1:
-                data = pd.DataFrame(resp_data)
-                data["fleet"] = vtype
-                data["vehID"] = vid_name_dict[vid] 
-                time_data_list.append(data)
-                page_num+=1
-            else:
-                page_num = None
-                break
-        except Exception as e:
-            break
-print(pd.concat(time_data_list))
+# time_data_list = []
+# for v in vid_dict:
+#     page_num = 1
+#     while page_num != None:
+#         try: 
+#             resp_data =  helpers.getTimeAPI(  
+#                                     vid_dict[v],
+#                                     start_dt =1672549200000,
+#                                     end_dt = 1683863999999,
+#                                     page = page_num
+#                                 )
+
+#             if len(resp_data)>0:
+#                 print("enter the if")
+#                 data = pd.DataFrame(resp_data)
+#                 data["fleet"] = vtype
+#                 data["vehID"] = vid_name_dict[v] 
+#                 time_data_list.append(data)
+#                 page_num+=1
+#                 print(len(time_data_list))
+#             else:
+#                 page_num = None
+#                 break
+#         except Exception as e:
+#             break
+
+# time_data = pd.concat(time_data_list)
+# print(time_data)
