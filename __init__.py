@@ -36,10 +36,8 @@ end_dt = 1683777600000
 # TODO: get the fleet data from endpoint
 vtype = "Electric"
 fleet = helpers.getActiveFleet(vtype)["vios"]
-print("fleet ---->",fleet)
 assets = helpers.getAssets()
-print("assets--->",assets)
-print("allfleet--->",helpers.getAllFleet())
+
 
 vid_dict ={}
 vid_name_dict = {}
@@ -51,7 +49,6 @@ for asset in assets:
 
 # print(type(fleet[0].get('vios')))
 
-print(vid_dict)
 
 # vid_dict = {
 #         "Electric":{
@@ -144,26 +141,24 @@ analysis_dict = helpers.keys_reader("analyses.json",analysis_keys)
 
 gps_data_list = []
 for v in vid_dict:
-    print(v,"\n",vid_dict)
     page_num = 1
     while page_num != None:
         try: 
-            print(vid_dict[v])
-            resp_data = helpers.getGPSLocation(
+            resp = helpers.getTimeAnalysis(
                             vid_dict[v],
                             start_dt,
                             end_dt,
-                            page_num
+                            page = page_num,
+                            label="analyses.energy_inservice"
                         )
-            
-            if len(resp_data)>0:
-                data = pd.DataFrame(resp_data)
-                data["fleet"] = vtype
-                data["vehID"] = vid_name_dict[v] 
-                data[['lat','lon']] = data['value'].str.split('|',expand=True)
-                data.drop(columns = ['value'], inplace=True)
-                gps_data_list.append(data)
+            if len(resp)>0:
                 page_num+=1
+                data_df = pd.DataFrame(resp)
+                # data["fleet"] = vtype
+                # data["vehID"] =v
+                # data_df[['lat','lon']] = data_df['value'].str.split('|',expand=True)
+                # data_df.drop(columns = ['value'], inplace=True)
+                gps_data_list.append(data_df)
             else:
                 page_num = None
                 break
@@ -175,7 +170,7 @@ for v in vid_dict:
             # with open('gps_data_dump.txt', 'a', encoding='utf-8') as f:
             #     f.write(f"{str(data)}\n")
 
-gps_df = pd.concat(gps_data_list)
+gps_df = pd.concat(gps_data_list,ignore_index=True)
 gps_df["time"] = pd.to_datetime(gps_df["time"]/1000, unit='s')
 print(gps_df)
 

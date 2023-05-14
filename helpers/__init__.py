@@ -204,11 +204,14 @@ def getReportsAPI(  vid = "adl_005",
         return print("Could not retreive data")
 
 
-def getGPSLocation(
+def getTimeAnalysis(
                         vid,
                         start_dt,
                         end_dt,
-                        page_num=1
+                        page,
+                        t_step = 30,
+                        t_step_units = "seconds",
+                        label = "analyses.gps_filter",
                     ):
     """
     Function that gets data from :
@@ -220,6 +223,15 @@ def getGPSLocation(
     time%5Bstep%5D%5B1%5D=seconds&
     time%5Btype%5D=first&
     label=analyses.gps_filter
+
+    https://dashboard.viriciti.com/api/v1/time/adl_005
+    ?page=2
+    &time%5Bstart%5D=1672549200000
+    &time%5Bend%5D=1684123200000
+    &time%5Bstep%5D%5B0%5D=6
+    &time%5Bstep%5D%5B1%5D=hours
+    &time%5Btype%5D=first
+    &label=analyses.soc_used
     """
     global cookies; baseURL
 
@@ -227,13 +239,13 @@ def getGPSLocation(
 
     URL_list  = [
         f"{baseURL}v1/time/{vid}?",
-        f"page={page_num}",
+        f"page={page}",
         f"&time%5Bstart%5D={start_dt}",
         f"&time%5Bend%5D={end_dt}",
-        f"&time%5Bstep%5D%5B0%5D=30",
-        f"&time%5Bstep%5D%5B1%5D=seconds",
+        f"&time%5Bstep%5D%5B0%5D={t_step}",
+        f"&time%5Bstep%5D%5B1%5D={t_step_units}",
         f"&time%5Btype%5D=first",
-        f"&label=analyses.gps_filter",
+        f"&label={label}",
     ]
     
     URL = "".join(URL_list)
@@ -397,50 +409,3 @@ def epochConvertTime():
     """
     Convert epochtime to normal
     """
-
-def getTimeAPI(
-                        vid,
-                        start_dt,
-                        end_dt,
-                        page=1,
-                        label = "analyses.soc_used"
-                    ):
-    """
-    Function that gets data from :
-    https://dashboard.viriciti.com/api/v1/time/adl_005
-    ?page=2
-    &time%5Bstart%5D=1672549200000
-    &time%5Bend%5D=1684123200000
-    &time%5Bstep%5D%5B0%5D=6
-    &time%5Bstep%5D%5B1%5D=hours
-    &time%5Btype%5D=first
-    &label=analyses.soc_used
-    """
-    global cookies
-
-    baseURL = "https://dashboard.viriciti.com/api/"
-
-    URL_list  = [
-        f"{baseURL}v1/time/{vid}?",
-        f"page={page}",
-        f"&time%5Bstart%5D={start_dt}",
-        f"&time%5Bend%5D={end_dt}",
-        f"&time%5Bstep%5D%5B0%5D=6",
-        f"&time%5Bstep%5D%5B1%5D=hours",
-        f"&time%5Btype%5D=first",
-        f"&label={label}",
-    ]
-    
-    URL = "".join(URL_list)
-    print(URL)
-    data_header = {
-            "Cookie": cookies,
-            "Content-Type": "application/json; charset=utf-8"
-                }
-    
-    response = requests.get(URL, headers= data_header,verify=False)
-    if response.status_code == 200:
-        res_json = response.json()
-        return res_json
-    else:
-        return print("Could not retrieve data")
