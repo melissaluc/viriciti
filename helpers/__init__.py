@@ -52,6 +52,7 @@ def getSessionCookies():
         session_cookies_dict_new = {f'{key}=': v for key, v in session_cookies_dict.items()}
         session_cookie = ';'.join(key + value for key, value in session_cookies_dict_new.items())
         return session_cookie
+        #TODO: confirm log in success 
         # print(r_dashboard.text)
     
    
@@ -286,8 +287,48 @@ def getAssets():
     else:
         return print("Could not retrieve data")
 
+def getAllFleet():
+    """
+    https://portal.viriciti.com/api/v2/fleets?
+    fields%5B0%5D=name
+    &fields%5B1%5D=company
+    &search=&searchBy%5B0%5D=name
+    &populate%5B0%5D%5Bpath%5D=company
+    &populate%5B0%5D%5Bselect%5D%5B0%5D=title
+    &limit=20&sort%5Blabel%5D=name
+    &sort%5Bdirection%5D=asc
+    """
+    global cookies
+    baseURL = "https://portal.viriciti.com/api/"
+    limit = 20
 
-def getActiveFleet():
+    URL_list  = [
+        f"{baseURL}v2/fleets?",
+        f"fields%5B0%5D=name",
+        f"&fields%5B1%5D=company",
+        f"&search=&searchBy%5B0%5D=name",
+        f"&populate%5B0%5D%5Bpath%5D=company",
+        f"&populate%5B0%5D%5Bselect%5D%5B0%5D=title",
+        f"&limit={limit}&sort%5Blabel%5D=name",
+        f"&sort%5Bdirection%5D=asc"
+    ]
+
+    URL = "".join(URL_list)
+    print(URL)
+
+    data_header = {
+        "Cookie": cookies,
+        "Content-Type": "application/json; charset=utf-8"
+            }
+    
+    response = requests.get(URL, headers= data_header,verify=False)
+    if response.status_code == 200:
+        res_json = response.json()
+        return res_json
+    else:
+        return print("Could not retrieve data")
+
+def getActiveFleet(fleetType=None):
     """
     Function that gets data from :
     https://dashboard.viriciti.com/api/v2/portal/fleets?
@@ -303,9 +344,26 @@ def getActiveFleet():
     """
     global cookies; baseURL
 
+    fleet_ids = getAllFleet()
+
+    fleet_ids_dict ={}
+    for f in fleet_ids:
+        fleet_ids_dict[f"{f['name']}"] = f["_id"]
+
+
+
+    if fleetType == "Electric":
+        # fleetType = "/60de2e4b5550a1d51ce1b1d1"
+        fleetType = "/" + fleet_ids_dict["Metrolinx ADL Electric 45'"]
+    elif fleetType == "Diesel":
+        # fleetType = "/60954e02608e434c39754aeb"
+        fleetType = "/" + fleet_ids_dict["Metrolinx ADL Diesel 45'"]
+    else:
+        fleetType ="/" 
+
     URL_list  = [
         f"{baseURL}v2/portal/fleets",
-        f"/60de2e4b5550a1d51ce1b1d1"
+        f"{fleetType}",
         f"?fields=_id%20name%20assets",
         f"&populate%5Bpath%5D=vios",
         f"&populate%5Bselect%5D=type%20name=Metrolinx+ADL+Electric+45%20vid%20group%20vin%20active%20assetType%20type_old",

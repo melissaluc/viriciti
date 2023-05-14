@@ -14,6 +14,7 @@ disable_warnings(InsecureRequestWarning)
 
 
 
+
 # Get current time
 currentTIME = datetime.now().strftime("%H:%M:%S")
 currentHOUR = datetime.now().strftime("%H")
@@ -25,13 +26,33 @@ currentDATE = date.today().strftime("%d/%m/%Y")
 period_int = 1
 period = "week" 
 t_res = "hour"
-start_dt = 1672635600000
-end_dt = 1683777600000
-# end_dt = int((datetime.now()-timedelta(days=5)).timestamp())*(1000)
+# start_dt = 1672635600000
+# end_dt = 1683777600000
 
+start_dt = int((datetime.now()-timedelta(days=10)).timestamp())*(1000)
+end_dt = int((datetime.now()-timedelta(days=5)).timestamp())*(1000)
+
+
+
+# ============GET fleet vehicle =========================
 # TODO: get the fleet data from endpoint
-vid_dict = helpers.getActiveFleet()
+vtype = "Electric"
+fleet = helpers.getActiveFleet(vtype)["vios"]
+print("fleet ---->",fleet)
+assets = helpers.getAssets()
+print("assets--->",assets)
+print("allfleet--->",helpers.getAllFleet)
+
+vid_dict ={}
+for asset in assets:
+    for f in fleet:
+        if asset["vid"] == f.get("vid",None):
+            vid_dict[asset["name"]] = asset["vid"]
+
+# print(type(fleet[0].get('vios')))
+
 print(vid_dict)
+
 # vid_dict = {
 #         "Electric":{
 #                 4001:"adl_005",
@@ -43,6 +64,8 @@ print(vid_dict)
 #             }
 #         }
 
+
+# ============GET analyses per vehicle =========================
 analysis_keys = [
     "Performance", 
     "Energy", 
@@ -86,10 +109,9 @@ analysis_keys = [
 #     print(analyses_data)
 
 
-
+# ============GET GPS per vehicle =========================
 # GET gps location for each vehicle in the fleet
 # TODO: conisder parallelism or map func vid_dict["Electric"], vid_dict["Diesel"]
-
 
 def getGPSdata ():
     # Iterate for one vehicle
@@ -120,38 +142,37 @@ def getGPSdata ():
 
 
 
-for vtype in vid_dict:
 
-    gps_data_list = []
-    for vid in vid_dict[vtype]:
-        page_num = 1
-        while page_num != None:
-            try: 
-                resp_data = helpers.getGPSLocation(
-                                vid_dict[vtype][vid],
-                                start_dt,
-                                end_dt = 1683777600000,
-                                page_num=page_num
-                            )
-                # print(resp_data)
-                if len(resp_data)>1:
-                    data = pd.DataFrame(resp_data)
-                    data["Fleet"] = vtype
-                    data["vehID"] = vid 
-                    data[['lat','lon']] = data['value'].str.split('|',expand=True)
-                    data.drop(columns = ['value'], inplace=True)
-                    gps_data_list.append(data)
-                    page_num+=1
-                else:
-                    page_num = None
-                    break
-            except Exception as e:
+gps_data_list = []
+for vid in vid_dict:
+    page_num = 1
+    while page_num != None:
+        try: 
+            resp_data = helpers.getGPSLocation(
+                            vid_dict[vid],
+                            start_dt,
+                            end_dt,
+                            page_num
+                        )
+            # print(resp_data)
+            if len(resp_data)>1:
+                data = pd.DataFrame(resp_data)
+                data["Fleet"] = vtype
+                data["vehID"] = vid 
+                data[['lat','lon']] = data['value'].str.split('|',expand=True)
+                data.drop(columns = ['value'], inplace=True)
+                gps_data_list.append(data)
+                page_num+=1
+            else:
+                page_num = None
                 break
+        except Exception as e:
+            break
 
-                # TODO: Testing
-                # print(data,"\n================\n")
-                # with open('gps_data_dump.txt', 'a', encoding='utf-8') as f:
-                #     f.write(f"{str(data)}\n")
+            # TODO: Testing
+            # print(data,"\n================\n")
+            # with open('gps_data_dump.txt', 'a', encoding='utf-8') as f:
+            #     f.write(f"{str(data)}\n")
 
 gps_df = pd.concat(gps_data_list)    
 print(gps_df)
