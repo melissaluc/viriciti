@@ -15,7 +15,7 @@ disable_warnings(InsecureRequestWarning)
 
 
 
-# Get current time
+# Set up params to pass
 currentTIME = datetime.now().strftime("%H:%M:%S")
 currentHOUR = datetime.now().strftime("%H")
 currentDATE = date.today().strftime("%d/%m/%Y")
@@ -26,14 +26,17 @@ t_res = "seconds"
 start_dt = 1672635600000
 end_dt = 1683777600000
 
-# DYNAMIC dt
-# start_dt = int((datetime.now()-timedelta(days=10)).timestamp())*(1000)
-# end_dt = int((datetime.now()-timedelta(days=5)).timestamp())*(1000)
+# =========== DYNAMIC datetime used to generate weekly reporting ========
+# dt_start = 10
+# dt_end = 1
+# start_dt = int((datetime.now()-timedelta(days=dt_start)).timestamp())*(1000)
+# end_dt = int((datetime.now()-timedelta(days=dt_end)).timestamp())*(1000)
 
 
 
-# ============GET fleet vehicle =========================
-# TODO: get the fleet data from endpoint
+# ============GET fleet info =========================
+# Fleet info is taken from api endpoint
+# TODO: handle vtype Diesel & Electric
 vtype = "Electric"
 fleet = helpers.getActiveFleet(vtype)["vios"]
 assets = helpers.getAssets()
@@ -47,22 +50,10 @@ for asset in assets:
             vid_dict[asset["name"]] = asset["vid"]
             vid_name_dict[asset["vid"]] = asset["name"]
 
-# print(type(fleet[0].get('vios')))
 
+# ============GET alert data =========================
 
-# vid_dict = {
-#         "Electric":{
-#                 4001:"adl_005",
-#                 4000:"adl_006"
-#             },
-#         "Diesel":{
-#                 8503:"adl_003",
-#                 8507:"adl_004"
-#             }
-#         }
-
-
-# ============GET analyses per vehicle =========================
+# ============GET report analyses per vehicle =========================
 analysis_keys = [
     "Performance", 
     "Energy", 
@@ -105,41 +96,19 @@ analysis_dict = helpers.keys_reader("analyses.json",analysis_keys)
 #     print(analyses_data)
 
 
-# # ============GET GPS per vehicle =========================
+# # ============GET | GPS | Speed | Energy In-serivce | SOC Used | per vehicle =========================
 # # GET gps location for each vehicle in the fleet
 # # TODO: conisder parallelism or map func vid_dict["Electric"], vid_dict["Diesel"]
 
-# def getGPSdata ():
-#     # Iterate for one vehicle
-#     gps_data_list = []
-#     page_num = 1
-#     while page_num != None:
-#         try: 
-#             resp_data = helpers.getGPSLocation(
-#                             vid_dict[vtype][vid],
-#                             start_dt,
-#                             end_dt = 1683777600000,
-#                             page_num=page_num
-#                         )
-#             # print(resp_data)
-#             if len(resp_data)>1:
-#                 data = pd.DataFrame(resp_data)
-#                 data["Fleet"] = vtype
-#                 data["vehID"] = vid 
-#                 data[['lat','lon']] = data['value'].str.split('|',expand=True)
-#                 data.drop(columns = ['value'], inplace=True)
-#                 gps_data_list.append(data)
-#                 page_num+=1
-#             else:
-#                 page_num = None
-#                 break
-#         except Exception as e:
-#             break
-
- 
+time_analysis_dict =  {
+    "soc_used":"analyses.soc_used",
+    "energy_inservice":"analyses.energy_inservice",
+    "gps":"analyses.gps_filter",
+    "speed":"ccvs1.wheel_based_vehicle_speed",
+}
 
 
-gps_data_list = []
+time_data_list = []
 for v in vid_dict:
     page_num = 1
     while page_num != None:
@@ -154,11 +123,11 @@ for v in vid_dict:
             if len(resp)>0:
                 page_num+=1
                 data_df = pd.DataFrame(resp)
-                # data["fleet"] = vtype
-                # data["vehID"] =v
+                data_df["fleet"] = vtype
+                data_df["vehID"] =v
                 # data_df[['lat','lon']] = data_df['value'].str.split('|',expand=True)
                 # data_df.drop(columns = ['value'], inplace=True)
-                gps_data_list.append(data_df)
+                time_data_list.append(data_df)
             else:
                 page_num = None
                 break
@@ -170,35 +139,8 @@ for v in vid_dict:
             # with open('gps_data_dump.txt', 'a', encoding='utf-8') as f:
             #     f.write(f"{str(data)}\n")
 
-gps_df = pd.concat(gps_data_list,ignore_index=True)
-gps_df["time"] = pd.to_datetime(gps_df["time"]/1000, unit='s')
-print(gps_df)
+time_df = pd.concat(time_data_list,ignore_index=True)
+time_df["time"] = pd.to_datetime(time_df["time"]/1000, unit='s')
+print(time_df)
 
-# time_data_list = []
-# for v in vid_dict:
-#     page_num = 1
-#     while page_num != None:
-#         try: 
-#             resp_data =  helpers.getTimeAPI(  
-#                                     vid_dict[v],
-#                                     start_dt =1672549200000,
-#                                     end_dt = 1683863999999,
-#                                     page = page_num
-#                                 )
-
-#             if len(resp_data)>0:
-#                 print("enter the if")
-#                 data = pd.DataFrame(resp_data)
-#                 data["fleet"] = vtype
-#                 data["vehID"] = vid_name_dict[v] 
-#                 time_data_list.append(data)
-#                 page_num+=1
-#                 print(len(time_data_list))
-#             else:
-#                 page_num = None
-#                 break
-#         except Exception as e:
-#             break
-
-# time_data = pd.concat(time_data_list)
-# print(time_data)
+print(helpers.getFleetStatus())

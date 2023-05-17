@@ -58,8 +58,26 @@ def getSessionCookies():
    
 cookies = getSessionCookies()
 print(cookies)
+# def getRequest(URL,params={}):
+#     """
+#     Return get response as JSON
+#     Pass URL & Params
+#     """
+#     global cookies
 
-def getRequest(URL):
+#     data_header = {
+#             "Cookie": cookies,
+#             "Content-Type": "application/json; charset=utf-8"
+#     }
+#     URL = "".join(URL_list)
+#     response = requests.get(URL, headers= data_header, params=params ,verify=False)
+#     if response.status_code == 200:
+#         res_json = response.json()
+#         return res_json
+#     else:
+#         print("Could not retrieve data")
+
+def getRequest(URL_list):
     """
     Return get response as JSON
     """
@@ -69,88 +87,31 @@ def getRequest(URL):
             "Cookie": cookies,
             "Content-Type": "application/json; charset=utf-8"
     }
-
+    URL = "".join(URL_list)
     response = requests.get(URL, headers= data_header ,verify=False)
     if response.status_code == 200:
         res_json = response.json()
         return res_json
+    else:
+        print("Could not retrieve data")
     
+def postRequest(URL, payload):
+
+    global cookies
+
+    data_header = {
+            "Cookie": cookies,
+            "Content-Type": "application/json"
+    }
 
 
 
-def getRouteLog (
-        baseURL,
-        start_dt=1672549200000,
-        end_dt=1683863999999,
-        vid= "adl_005",
-        time_res=6,
-        time_res_unit="hours"
-        ):
-    """ 
-    GET request at viriciti endpoint to get "Route Info" and "Graphs" data\n
-    baseURL : endpoint base URL\n
-    start_dt:\n
-    end_dt:\n
-    vehID:\n
-    analysis:\n
-    time_res: default=6\n
-    time_res_unit: default=hours\n
-
-    Function that gets data from :
-    https://dashboard.viriciti.com/vio/adl_006/route_log
-    
-    """
-    global cookies; baseURL; 
-
-    # increment
-        # route info 
-    route_info_URL_list = [
-                    f"{baseURL}v2/delta/multilabel/{vehID}?",
-                    f"labels=time_inservice&",
-                    f"labels=energy_inservice&",
-                    f"labels=soc_used&",
-                    f"labels=odo_reference&",
-                    f"labels=energy_recovered&",
-                    f"labels=time_driven&",
-                    f"labels=fuel_used_inservice&",
-                    f"labels=hydrogen_used_inservice&",
-                    f"start={start_dt}&",
-                    f"end={end_dt}"
-    ]
-
-    route_URL = "".join(route_info_URL_list)
-    route_data = getRequest(route_URL)
-    
-    page = 1
-    analysis = ""
-    while page is not None:
-
-        # Graph Data 
-        graph_URL_list = [
-                    f"{baseURL}v1/time/{vid}",
-                    f"?page={page}",
-                    f"&time%5Bstart%5D={start_dt}",
-                    f"&time%5Bend%5D={end_dt}",
-                    f"&time%5Bstep%5D%5B0%5D={time_res}",
-                    f"&time%5Bstep%5D%5B1%5D={time_res_unit}",
-                    f"&time%5Btype%5D=first&label={analysis}"
-                    ]
-        try:
-            page+=1
-            graph_URL = "".join(graph_URL_list)
-            getRequest(graph_URL)
-        except Exception as e:
-            page = None
-        
-        return route_data 
-
-def getAlerts ():
-    """
-    Function that gets data from :
-    https://dashboard.viriciti.com/api/v1/messages/diagnostic-message?
-    query=%7B%22onGoing%22%3Atrue%7D
-    """
-
+    response = requests.post(URL, headers=data_header,json=payload ,verify=False)
+    if response.status_code == 200:
+        res_json = response.json()
+        return res_json
+    else:
+        print("Could not retieve data")
 
 
 def getReportsAPI(  vid = "adl_005",
@@ -189,20 +150,8 @@ def getReportsAPI(  vid = "adl_005",
         f"&time%5Btimezone%5D={tz}",
         ]
     
-    URL = "".join(URL_list)
-    print(URL)
-    data_header = {
-            "Cookie": cookies,
-            "Content-Type": "application/json; charset=utf-8"
-                }
-    
-    response = requests.get(URL, headers= data_header ,verify=False)
-    if response.status_code == 200:
-        res_json = response.json()
-        return res_json
-    else:
-        return print("Could not retreive data")
-
+    req = getRequest(URL_list)
+    return req
 
 def getTimeAnalysis(
                         vid,
@@ -247,22 +196,9 @@ def getTimeAnalysis(
         f"&time%5Btype%5D=first",
         f"&label={label}",
     ]
-    
-    URL = "".join(URL_list)
-    print(URL)
-    data_header = {
-            "Cookie": cookies,
-            "Content-Type": "application/json; charset=utf-8"
-                }
-    
-    response = requests.get(URL, headers= data_header,verify=False)
-    if response.status_code == 200:
-        res_json = response.json()
-        return res_json
-    else:
-        return print("Could not retrieve data")
 
-
+    req = getRequest(URL_list)
+    return req
 
 def getAssets():
     """
@@ -292,19 +228,8 @@ def getAssets():
     ]
 
     
-    URL = "".join(URL_list)
-    print(URL)
-    data_header = {
-            "Cookie": cookies,
-            "Content-Type": "application/json; charset=utf-8"
-                }
-    
-    response = requests.get(URL, headers= data_header,verify=False)
-    if response.status_code == 200:
-        res_json = response.json()
-        return res_json
-    else:
-        return print("Could not retrieve data")
+    req = getRequest(URL_list)
+    return req
 
 def getAllFleet():
     """
@@ -331,21 +256,8 @@ def getAllFleet():
         f"&limit={limit}&sort%5Blabel%5D=name",
         f"&sort%5Bdirection%5D=asc"
     ]
-
-    URL = "".join(URL_list)
-    print(URL)
-
-    data_header = {
-        "Cookie": cookies,
-        "Content-Type": "application/json; charset=utf-8"
-            }
-    
-    response = requests.get(URL, headers= data_header,verify=False)
-    if response.status_code == 200:
-        res_json = response.json()
-        return res_json
-    else:
-        return print("Could not retrieve data")
+    req = getRequest(URL_list)
+    return req
 
 def getActiveFleet(fleetType=None):
     """
@@ -390,22 +302,124 @@ def getActiveFleet(fleetType=None):
     ]
 
     
-    URL = "".join(URL_list)
-    print(URL)
-    data_header = {
-            "Cookie": cookies,
-            "Content-Type": "application/json; charset=utf-8"
+    req = getRequest(URL_list)
+    return req
+# ---------------------------------
+def getDM1():
+    """"
+    https://dashboard.viriciti.com/api/v1/messages/diagnostic-message
+    ?vids%5B0%5D=adl_004
+    &query=%7B%22onGoing%22%3Atrue%7D
+
+    https://dashboard.viriciti.com/api/v1/messages/diagnostic-message
+    ?query=%7B%22onGoing%22%3Atrue%7D
+    """
+    return
+
+def getIncidents():
+    """
+    https://dashboard.viriciti.com/api/v1/incidents
+    ?limit=20
+    &skip=0
+    &sort%5Bstart.time%5D=-1
+    &query=%7B%22start.time%22%3A%7B%22%24gte%22%3A1 672549200000 %2C%22%24lt%22%3A 1682913600000 %7D%7D
+    """
+    return
+
+# ---------------------------------
+# TODO: automate payload: filter for single veh and fleet (i.e. diesel or electric)
+def getFleetStatus():
+    global cookies
+
+    # TODO: build payload: get all fleet or specific fleet
+    # --- List of labels: labels_list
+    # ---- Buid dict of vid: labels_list
+    payload = {"adl_003":
+                    ["gps_filter","soc_filtered","fuel_level","energetic_state","alive"],
+                "adl_004":
+                    ["gps_filter","soc_filtered","fuel_level","energetic_state","alive"],
+                "adl_005":
+                    ["gps_filter","soc_filtered","fuel_level","energetic_state","alive"],
+                "adl_006":["gps_filter","soc_filtered","fuel_level","energetic_state","alive"]
                 }
+    URL = "https://dashboard.viriciti.com/api/v1/viostate"
+    resp = postRequest(URL, payload)
+    return resp
+
+
+
+def getRouteLog (
+        start_dt=1672549200000,
+        end_dt=1683863999999,
+        vid= "adl_005",
+        time_res=6,
+        time_res_unit="hours"
+        ):
+    """ 
+    GET request at viriciti endpoint to get "Route Info"
+    Time in service	01:36 h   ["time_inservice"]["delta"]
+    Time driving	00:49 h ["time_driven"]["delta"]
+    Battery used	11.5 %["soc_used"["delta"]]
+    Distance	19.2 km ["odo_reference"]["delta"]
+    Energy used in service	51.83 kWh ["energy_inservice"]["delta"]
+    Energy regenerated	8.23 kWh["energy_recovered"]["delta"]
     
-    response = requests.get(URL, headers= data_header,verify=False)
-    if response.status_code == 200:
-        res_json = response.json()
-        return res_json
-    else:
-        return print("Could not retrieve data")
-
-
-def epochConvertTime():
+    Function that gets data from :
+    https://dashboard.viriciti.com/vio/adl_006/route_log
+    
     """
-    Convert epochtime to normal
+    global baseURL
+
+    # increment
+        # route info 
+    URL_list = [
+                    f"{baseURL}v2/delta/multilabel/{vid}?",
+                    f"labels=time_inservice&",
+                    f"labels=energy_inservice&",
+                    f"labels=soc_used&",
+                    f"labels=odo_reference&",
+                    f"labels=energy_recovered&",
+                    f"labels=time_driven&",
+                    f"labels=fuel_used_inservice&",
+                    f"labels=hydrogen_used_inservice&",
+                    f"start={start_dt}&",
+                    f"end={end_dt}"
+                ]
+
+    req = getRequest(URL_list)
+    return req
+    
+
+def getRouteLogGraphs(
+            vid,
+            start_dt,
+            end_dt,
+            t_step,
+            t_step_unit,
+            time_type="first",
+            analysis = "ccvs1.wheel_based_vehicle_speed"
+                    ):
     """
+
+    Analysis - soc - SOC used
+
+    Analysis - energy - Energy used in service
+
+    Vehicle - Wheel Based Vehicle Speed
+
+    
+    """
+    global baseURL
+
+    URL_list = [
+                f"{baseURL}v1/time/{vid}",
+                f"?page=1&time%5Bstart%5D={start_dt}",
+                f"&time%5Bend%5D={end_dt}",
+                f"&time%5Bstep%5D%5B0%5D={t_step}",
+                f"&time%5Bstep%5D%5B1%5D={t_step_unit}",
+                f"&time%5Btype%5D={time_type}",
+                f"&label={analysis}"
+                ]
+    
+    req = getRequest(URL_list)
+    return req

@@ -13,7 +13,10 @@
                 "Number of charging sessions":"analyses.charging_counter",
                 "ODO":"analyses.odo_reference",
                 "Regeneration rate":"analyses.recuperation_rate_cur_day",
-                "Relative distance driven in area":"analyses.distance_in_area"
+                "Relative distance driven in area":"analyses.distance_in_area",
+                "TBD - Net CO2":"analyses.co2_netto",
+                "TBD - Net NOx":"analyses.nox_netto",
+                "TBD - Net Particles":"analyses.particles_netto"
             },
     "Energy" :{
                     "Energy charged":"analyses.energy_charged",
