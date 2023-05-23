@@ -4,6 +4,11 @@ import os
 import json
 from urllib3 import disable_warnings
 from urllib3.exceptions import InsecureRequestWarning
+import constants
+
+# TODO: Store credentials in environment variable
+
+
 disable_warnings(InsecureRequestWarning)
 
 baseURL = "https://dashboard.viriciti.com/api/" 
@@ -58,24 +63,6 @@ def getSessionCookies():
    
 cookies = getSessionCookies()
 print(cookies)
-# def getRequest(URL,params={}):
-#     """
-#     Return get response as JSON
-#     Pass URL & Params
-#     """
-#     global cookies
-
-#     data_header = {
-#             "Cookie": cookies,
-#             "Content-Type": "application/json; charset=utf-8"
-#     }
-#     URL = "".join(URL_list)
-#     response = requests.get(URL, headers= data_header, params=params ,verify=False)
-#     if response.status_code == 200:
-#         res_json = response.json()
-#         return res_json
-#     else:
-#         print("Could not retrieve data")
 
 def getRequest(URL_list):
     """
@@ -87,6 +74,7 @@ def getRequest(URL_list):
             "Cookie": cookies,
             "Content-Type": "application/json; charset=utf-8"
     }
+    # TODO: update URL List to params dict
     URL = "".join(URL_list)
     response = requests.get(URL, headers= data_header ,verify=False)
     if response.status_code == 200:
@@ -400,14 +388,10 @@ def getRouteLogGraphs(
             analysis = "ccvs1.wheel_based_vehicle_speed"
                     ):
     """
-
     Analysis - soc - SOC used
-
     Analysis - energy - Energy used in service
-
     Vehicle - Wheel Based Vehicle Speed
 
-    
     """
     global baseURL
 
