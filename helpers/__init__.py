@@ -4,7 +4,7 @@ import os
 import json
 from urllib3 import disable_warnings
 from urllib3.exceptions import InsecureRequestWarning
-import constants
+from constants import USERNAME, PASSWORD
 
 # TODO: Store credentials in environment variable
 
@@ -33,12 +33,14 @@ def getSessionCookies():
     """
     Function gets session cookies
     """
+
+    global USERNAME; PASSWORD
     # USERNAME =urllib.parse.quote_plus('Melissa.Luc@metrolinx.com')
     #  PASSWORD = urllib.parse.quote_plus('CUgB4t9017ibkH^!')
     URL = "https://dashboard.viriciti.com/dashboard"
-    credentials= keys_reader("config.json",["USERNAME","PASSWORD"])
-    USERNAME = credentials["USERNAME"]
-    PASSWORD = credentials["PASSWORD"]
+    # credentials= keys_reader("config.json",["USERNAME","PASSWORD"])
+    # USERNAME = credentials["USERNAME"]
+    # PASSWORD = credentials["PASSWORD"]
 
     payload = {"username": f"{USERNAME}",
         "password": f"{PASSWORD}",
