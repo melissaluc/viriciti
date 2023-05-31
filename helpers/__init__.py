@@ -4,10 +4,11 @@ import os
 import json
 from urllib3 import disable_warnings
 from urllib3.exceptions import InsecureRequestWarning
-from constants import USERNAME, PASSWORD
+from helpers.constants import USERNAME, PASSWORD 
 
-# TODO: Store credentials in environment variable
-
+# TODO: Store secrets [DONE]
+# TODO: store secret info elsewhere such as companyID..
+# TODO: Update URL_list arg to Params
 
 disable_warnings(InsecureRequestWarning)
 
@@ -16,18 +17,22 @@ companyID = "60819a6e720b0a5d366a68e7"
 # "https://api.viriciti.com/api/v1/sessions/my"
 tz = "America%2FToronto" 
 
-def keys_reader(fname,keys):
+def keys_reader(fname,keys=None):
     """
     Function to read in values stored in json file
+    return dict obj
     """
     fileDir = os.path.dirname(os.path.realpath('__file__'))
     fp = os.path.join(fileDir, fname)
     keys_dict={}
     with open(fp,'r') as file:
         file_data =json.load(file)
-        for key in keys:
-            keys_dict[key] = file_data[key]
-    return keys_dict
+        if keys != None:
+            for key in keys:
+                keys_dict[key] = file_data[key]
+                return keys_dict
+        else:
+            return file_data
 
 def getSessionCookies():
     """
@@ -35,19 +40,17 @@ def getSessionCookies():
     """
 
     global USERNAME; PASSWORD
-    # USERNAME =urllib.parse.quote_plus('Melissa.Luc@metrolinx.com')
-    #  PASSWORD = urllib.parse.quote_plus('CUgB4t9017ibkH^!')
-    URL = "https://dashboard.viriciti.com/dashboard"
-    # credentials= keys_reader("config.json",["USERNAME","PASSWORD"])
-    # USERNAME = credentials["USERNAME"]
-    # PASSWORD = credentials["PASSWORD"]
 
-    payload = {"username": f"{USERNAME}",
+    URL = "https://dashboard.viriciti.com/dashboard"
+
+
+    payload = {
+        "username": f"{USERNAME}",
         "password": f"{PASSWORD}",
         "submit":"",
         "header": {
             "Content-Type":"application/json"
-        }
+            }
 
         }    
 

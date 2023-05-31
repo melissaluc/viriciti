@@ -1,0 +1,2 @@
+,label,time,diff,count,length,initial,start,end,max,min,vehID
+1,analyses.calculated_odo,1672722000000,"{'time': 46002526, 'value': 2.0130300000000716}",11312,2,"{'time': 1672755224788, 'value': 3041.538264}","{'time': 1672755224788, 'value': 3041.538264}","{'time': 1672768002526, 'value': 3043.551294}","{'time': 1672767954238, 'value': 3043.551294}","{'time': 1672755224788, 'value': 3041.538264}",4000
