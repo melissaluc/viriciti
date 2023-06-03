@@ -5,8 +5,8 @@ import json
 from urllib3 import disable_warnings
 from urllib3.exceptions import InsecureRequestWarning
 from helpers.constants import USERNAME, PASSWORD 
+import logging
 
-# TODO: Store secrets [DONE]
 # TODO: store secret info elsewhere such as companyID..
 # TODO: Update URL_list arg to Params
 
@@ -65,7 +65,7 @@ def getSessionCookies():
         #TODO: confirm log in success 
         # print(r_dashboard.text)
     
-   
+ 
 cookies = getSessionCookies()
 print(cookies)
 
@@ -81,12 +81,14 @@ def getRequest(URL_list):
     }
     # TODO: update URL List to params dict
     URL = "".join(URL_list)
+    # print(URL)
     response = requests.get(URL, headers= data_header ,verify=False)
     if response.status_code == 200:
         res_json = response.json()
         return res_json
     else:
         print("Could not retrieve data")
+        return response.status_code
     
 def postRequest(URL, payload):
 
@@ -96,9 +98,7 @@ def postRequest(URL, payload):
             "Cookie": cookies,
             "Content-Type": "application/json"
     }
-
-
-
+    
     response = requests.post(URL, headers=data_header,json=payload ,verify=False)
     if response.status_code == 200:
         res_json = response.json()
@@ -188,7 +188,9 @@ def getTimeAnalysis(
         f"&time%5Bstep%5D%5B1%5D={t_step_units}",
         f"&time%5Btype%5D=first",
         f"&label={label}",
+        
     ]
+ 
 
     req = getRequest(URL_list)
     return req

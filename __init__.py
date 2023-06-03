@@ -6,6 +6,7 @@ import logging
 import CADAVL
 import GTFSIngest
 import logging
+import WeatherIngest
 
 from functools import reduce   
 
@@ -16,12 +17,6 @@ logging.basicConfig(
     format="%(asctime)s:%(levelname)s:%(message)s",
     datefmt="%Y-%m-%d %I:%M:%S%p",
 )
-
-
-# Set up params to pass
-currentTIME = datetime.now().strftime("%H:%M:%S")
-currentHOUR = datetime.now().strftime("%H")
-currentDATE = date.today().strftime("%d/%m/%Y")
 
 
 # Params
@@ -44,14 +39,13 @@ if dt_end > 0:
 else:
     end_dt = int((datetime.now()).timestamp())*(1000)
 
-print(end_dt)
-
+weather_df = WeatherIngest.main(start_dt,end_dt)
 
 # Get EV trip data
 
 # block_data_df = CADAVL.main(start_dt,end_dt)
 
-gtfs_df = GTFSIngest.main()
+# gtfs_df = GTFSIngest.main()
 
 
 # ============GET fleet info =========================
@@ -71,9 +65,15 @@ time_analyses_df_list = []
 for key, value in time_analyses_df_dict.items():
     # print(f"the key is: {key}\n{value}")
     if len(value)>0:
-        time_df=value.rename(columns={'value':f'{str(key).replace(" ", "_")}'}).set_index(keys=['time','vehID'])
+        time_df=value.rename(columns={
+            'value':f'{str(key).replace(" ", "_")}'
+            }).set_index(keys=['time','vehID'])
+        
         time_analyses_df_list.append(time_df)
-        print(time_df)
 
-data_merge_time_analysis = reduce(lambda left, right: pd.merge(left , right, on = ["time","vehID","fleet"],how = "outer"),time_analyses_df_list)
-# data_merge_time_analysis .to_csv('check_df.csv')
+
+data_merge_time_analysis = reduce(
+            lambda left, right: pd.merge(
+                            left , right, on = ["time","vehID","fleet"],how = "outer"
+                            ),time_analyses_df_list)
+

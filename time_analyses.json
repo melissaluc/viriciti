@@ -25,8 +25,6 @@
     "Time not in service":"analyses.time_not_inservice",
     "Time using":"analyses.time_used",
     "Time driven":"analyses.time_driven",
-    "soc_used":"analyses.soc_used",
-    "energy_inservice":"analyses.energy_inservice",
     "gps":"analyses.gps_filter",
-    "speed":"ccvs1.wheel_based_vehicle_speed"
+    "Wheel Based Vehicle Speed":"ccvs1.wheel_based_vehicle_speed"
 }
