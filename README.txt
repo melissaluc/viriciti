@@ -1,3 +1,57 @@
+Electric Vehicle Bus Battery Monitoring ETL
+
+The Python-based ETL pipeline is scheduled to run daily at 9:00 AM through the Windows Task Scheduler and a bat file. Its primary objective is to fetch vendor data (ChargePoint) regarding electric vehicle performance and conduct calculations to update an engineer's Excel tracking sheet. This pipeline was developed to seamlessly integrate with existing systems like the vehicle dispatch system (CAD/AVL) via Oracle Database. By leveraging trip start-end time data, it accurately computes performance metrics within trip timeframes.
+
+Key features of the pipeline include:
+Interaction with CAD/AVL System: The pipeline interacts with the CAD/AVL system via Oracle, specifically querying electric vehicles (EVs) in service for the day. The retrieved dataframe, containing start-end times for trips/service blocks, is utilized to extract vendor data for the day, eliminating the need for manual communication regarding vehicle service departures.
+Data Extraction: CAD/AVL data is utilized to extract vendor-collected EV data. This involves querying for each vehicle and providing start-end times to evaluate performance exclusively during service.
+Output to Performance Tracking Sheet: The pipeline generates a CSV file utilizing vendor data to compile specific metrics tracked by the engineer. These metrics are instrumental in reporting on the performance of EVs in service.
+
+
+Due to the absence of explicit APIs, the pipeline employs web scraping techniques to interact with the UI and internal APIs for data retrieval. This automation streamlines a labor-intensive process previously managed by a team of three individuals. Specifically, two engineers manually filtered route data based on dispatch personnel reports and recorded the data into an Excel spreadsheet.
+
+The metrics collected from Chargepoint encompass temperature, state of charge, odometer reading, energy consumption, idling time, charging, driving duration, regeneration rate, charging events, and vehicle speed. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 || ViriCiti ||
 
 Manage Account
@@ -31,52 +85,6 @@ payload = {
 "adl_006":["gps_filter","soc_filtered","fuel_level","energetic_state","alive"]}
 
 
-
-GET for Report
-https://dashboard.viriciti.com/api/v1/report/adl_006?labels%5B0%5D=analyses.charge_cycles&time%5Bstart%5D=1672549200000&time%5Bend%5D=1683863999999&time%5Bperiod%5D%5B0%5D=1&time%5Bperiod%5D%5B1%5D=week&time%5Bresolution%5D=hour&time%5Btimezone%5D=America%2FToronto
-https://dashboard.viriciti.com/api/v1/report/adl_006?labels%5B0%5D=analyses.average_inservice_speed&time%5Bstart%5D=1672549200000&time%5Bend%5D=1683863999999&time%5Bperiod%5D%5B0%5D=1&time%5Bperiod%5D%5B1%5D=week&time%5Bresolution%5D=hour&time%5Btimezone%5D=America%2FToronto
-https://dashboard.viriciti.com/api/v1/report/adl_006?labels%5B0%5D=analyses.average_speed&time%5Bstart%5D=1672549200000&time%5Bend%5D=1683863999999&time%5Bperiod%5D%5B0%5D=1&time%5Bperiod%5D%5B1%5D=week&time%5Bresolution%5D=hour&time%5Btimezone%5D=America%2FToronto
-https://dashboard.viriciti.com/api/v1/report/adl_006?labels%5B0%5D=analyses.efficiency_cur_day&time%5Bstart%5D=1672549200000&time%5Bend%5D=1683863999999&time%5Bperiod%5D%5B0%5D=1&time%5Bperiod%5D%5B1%5D=week&time%5Bresolution%5D=hour&time%5Btimezone%5D=America%2FToronto
-https://dashboard.viriciti.com/api/v1/report/adl_006?labels%5B0%5D=analyses.efficiency_cur_day_driving&time%5Bstart%5D=1672549200000&time%5Bend%5D=1683863999999&time%5Bperiod%5D%5B0%5D=1&time%5Bperiod%5D%5B1%5D=week&time%5Bresolution%5D=hour&time%5Btimezone%5D=America%2FToronto
-https://dashboard.viriciti.com/api/v1/report/adl_006?labels%5B0%5D=analyses.efficiency_cur_day_inservice&time%5Bstart%5D=1672549200000&time%5Bend%5D=1683863999999&time%5Bperiod%5D%5B0%5D=1&time%5Bperiod%5D%5B1%5D=week&time%5Bresolution%5D=hour&time%5Btimezone%5D=America%2FToronto
-https://dashboard.viriciti.com/api/v1/report/adl_006?labels%5B0%5D=analyses.calculated_odo&time%5Bstart%5D=1672549200000&time%5Bend%5D=1683863999999&time%5Bperiod%5D%5B0%5D=1&time%5Bperiod%5D%5B1%5D=week&time%5Bresolution%5D=hour&time%5Btimezone%5D=America%2FToronto
-https://dashboard.viriciti.com/api/v1/report/adl_006?labels%5B0%5D=analyses.recuperation_rate_cur_day&time%5Bstart%5D=1672549200000&time%5Bend%5D=1683863999999&time%5Bperiod%5D%5B0%5D=1&time%5Bperiod%5D%5B1%5D=week&time%5Bresolution%5D=hour&time%5Btimezone%5D=America%2FToronto
-https://dashboard.viriciti.com/api/v1/report/adl_006?labels%5B0%5D=analyses.rel_time_in_area&time%5Bstart%5D=1672549200000&time%5Bend%5D=1683863999999&time%5Bperiod%5D%5B0%5D=1&time%5Bperiod%5D%5B1%5D=week&time%5Bresolution%5D=hour&time%5Btimezone%5D=America%2FToronto
-https://dashboard.viriciti.com/api/v1/report/adl_006?labels%5B0%5D=analyses.rel_distance_in_area&time%5Bstart%5D=1672549200000&time%5Bend%5D=1683863999999&time%5Bperiod%5D%5B0%5D=1&time%5Bperiod%5D%5B1%5D=week&time%5Bresolution%5D=hour&time%5Btimezone%5D=America%2FToronto
-https://dashboard.viriciti.com/api/v1/report/adl_006?labels%5B0%5D=analyses.fuel_used_per_km_cur_day&time%5Bstart%5D=1672549200000&time%5Bend%5D=1683863999999&time%5Bperiod%5D%5B0%5D=1&time%5Bperiod%5D%5B1%5D=week&time%5Bresolution%5D=hour&time%5Btimezone%5D=America%2FToronto
-https://dashboard.viriciti.com/api/v1/report/adl_006?labels%5B0%5D=analyses.fuel_used_inservice_per_km_cur_day&time%5Bstart%5D=1672549200000&time%5Bend%5D=1683863999999&time%5Bperiod%5D%5B0%5D=1&time%5Bperiod%5D%5B1%5D=week&time%5Bresolution%5D=hour&time%5Btimezone%5D=America%2FToronto
-https://dashboard.viriciti.com/api/v1/report/adl_006?labels%5B0%5D=vdhr.total_vehicle_distance&time%5Bstart%5D=1672549200000&time%5Bend%5D=1683863999999&time%5Bperiod%5D%5B0%5D=1&time%5Bperiod%5D%5B1%5D=week&time%5Bresolution%5D=hour&time%5Btimezone%5D=America%2FToronto
-https://dashboard.viriciti.com/api/v1/report/adl_006?labels%5B0%5D=analyses.energy_charged&time%5Bstart%5D=1672549200000&time%5Bend%5D=1683863999999&time%5Bperiod%5D%5B0%5D=1&time%5Bperiod%5D%5B1%5D=week&time%5Bresolution%5D=hour&time%5Btimezone%5D=America%2FToronto
-https://dashboard.viriciti.com/api/v1/report/adl_006?labels%5B0%5D=analyses.energy_consumed&time%5Bstart%5D=1672549200000&time%5Bend%5D=1683863999999&time%5Bperiod%5D%5B0%5D=1&time%5Bperiod%5D%5B1%5D=week&time%5Bresolution%5D=hour&time%5Btimezone%5D=America%2FToronto
-https://dashboard.viriciti.com/api/v1/report/adl_006?labels%5B0%5D=analyses.energy_driven&time%5Bstart%5D=1672549200000&time%5Bend%5D=1683863999999&time%5Bperiod%5D%5B0%5D=1&time%5Bperiod%5D%5B1%5D=week&time%5Bresolution%5D=hour&time%5Btimezone%5D=America%2FToronto
-https://dashboard.viriciti.com/api/v1/report/adl_006?labels%5B0%5D=analyses.energy_idled&time%5Bstart%5D=1672549200000&time%5Bend%5D=1683863999999&time%5Bperiod%5D%5B0%5D=1&time%5Bperiod%5D%5B1%5D=week&time%5Bresolution%5D=hour&time%5Btimezone%5D=America%2FToronto
-https://dashboard.viriciti.com/api/v1/report/adl_006?labels%5B0%5D=analyses.energy_inservice&time%5Bstart%5D=1672549200000&time%5Bend%5D=1683863999999&time%5Bperiod%5D%5B0%5D=1&time%5Bperiod%5D%5B1%5D=week&time%5Bresolution%5D=hour&time%5Btimezone%5D=America%2FToronto
-https://dashboard.viriciti.com/api/v1/report/adl_006?labels%5B0%5D=analyses.energy_not_inservice&time%5Bstart%5D=1672549200000&time%5Bend%5D=1683863999999&time%5Bperiod%5D%5B0%5D=1&time%5Bperiod%5D%5B1%5D=week&time%5Bresolution%5D=hour&time%5Btimezone%5D=America%2FToronto
-https://dashboard.viriciti.com/api/v1/report/adl_006?labels%5B0%5D=analyses.energy_recovered&time%5Bstart%5D=1672549200000&time%5Bend%5D=1683863999999&time%5Bperiod%5D%5B0%5D=1&time%5Bperiod%5D%5B1%5D=week&time%5Bresolution%5D=hour&time%5Btimezone%5D=America%2FToronto
-https://dashboard.viriciti.com/api/v1/report/adl_006?labels%5B0%5D=analyses.energy_used&time%5Bstart%5D=1672549200000&time%5Bend%5D=1683863999999&time%5Bperiod%5D%5B0%5D=1&time%5Bperiod%5D%5B1%5D=week&time%5Bresolution%5D=hour&time%5Btimezone%5D=America%2FToronto
-https://dashboard.viriciti.com/api/v1/report/adl_006?labels%5B0%5D=analyses.odo_reference&time%5Bstart%5D=1672549200000&time%5Bend%5D=1683863999999&time%5Bperiod%5D%5B0%5D=1&time%5Bperiod%5D%5B1%5D=week&time%5Bresolution%5D=hour&time%5Btimezone%5D=America%2FToronto
-https://dashboard.viriciti.com/api/v1/report/adl_006?labels%5B0%5D=analyses.soc_charged&time%5Bstart%5D=1672549200000&time%5Bend%5D=1683863999999&time%5Bperiod%5D%5B0%5D=1&time%5Bperiod%5D%5B1%5D=week&time%5Bresolution%5D=hour&time%5Btimezone%5D=America%2FToronto
-https://dashboard.viriciti.com/api/v1/report/adl_006?labels%5B0%5D=analyses.charging_counter&time%5Bstart%5D=1672549200000&time%5Bend%5D=1683863999999&time%5Bperiod%5D%5B0%5D=1&time%5Bperiod%5D%5B1%5D=week&time%5Bresolution%5D=hour&time%5Btimezone%5D=America%2FToronto
-https://dashboard.viriciti.com/api/v1/report/adl_006?labels%5B0%5D=analyses.soc_used&time%5Bstart%5D=1672549200000&time%5Bend%5D=1683863999999&time%5Bperiod%5D%5B0%5D=1&time%5Bperiod%5D%5B1%5D=week&time%5Bresolution%5D=hour&time%5Btimezone%5D=America%2FToronto
-https://dashboard.viriciti.com/api/v1/report/adl_006?labels%5B0%5D=analyses.soc_used_driving&time%5Bstart%5D=1672549200000&time%5Bend%5D=1683863999999&time%5Bperiod%5D%5B0%5D=1&time%5Bperiod%5D%5B1%5D=week&time%5Bresolution%5D=hour&time%5Btimezone%5D=America%2FToronto
-https://dashboard.viriciti.com/api/v1/report/adl_006?labels%5B0%5D=analyses.soc_used_idling&time%5Bstart%5D=1672549200000&time%5Bend%5D=1683863999999&time%5Bperiod%5D%5B0%5D=1&time%5Bperiod%5D%5B1%5D=week&time%5Bresolution%5D=hour&time%5Btimezone%5D=America%2FToronto
-https://dashboard.viriciti.com/api/v1/report/adl_006?labels%5B0%5D=analyses.soc_used_inservice&time%5Bstart%5D=1672549200000&time%5Bend%5D=1683863999999&time%5Bperiod%5D%5B0%5D=1&time%5Bperiod%5D%5B1%5D=week&time%5Bresolution%5D=hour&time%5Btimezone%5D=America%2FToronto
-https://dashboard.viriciti.com/api/v1/report/adl_006?labels%5B0%5D=analyses.soc_used_not_inservice&time%5Bstart%5D=1672549200000&time%5Bend%5D=1683863999999&time%5Bperiod%5D%5B0%5D=1&time%5Bperiod%5D%5B1%5D=week&time%5Bresolution%5D=hour&time%5Btimezone%5D=America%2FToronto
-https://dashboard.viriciti.com/api/v1/report/adl_006?labels%5B0%5D=analyses.time_charged&time%5Bstart%5D=1672549200000&time%5Bend%5D=1683863999999&time%5Bperiod%5D%5B0%5D=1&time%5Bperiod%5D%5B1%5D=week&time%5Bresolution%5D=hour&time%5Btimezone%5D=America%2FToronto
-https://dashboard.viriciti.com/api/v1/report/adl_006?labels%5B0%5D=analyses.time_consumed&time%5Bstart%5D=1672549200000&time%5Bend%5D=1683863999999&time%5Bperiod%5D%5B0%5D=1&time%5Bperiod%5D%5B1%5D=week&time%5Bresolution%5D=hour&time%5Btimezone%5D=America%2FToronto
-https://dashboard.viriciti.com/api/v1/report/adl_006?labels%5B0%5D=analyses.time_driven&time%5Bstart%5D=1672549200000&time%5Bend%5D=1683863999999&time%5Bperiod%5D%5B0%5D=1&time%5Bperiod%5D%5B1%5D=week&time%5Bresolution%5D=hour&time%5Btimezone%5D=America%2FToronto
-https://dashboard.viriciti.com/api/v1/report/adl_006?labels%5B0%5D=analyses.time_idled&time%5Bstart%5D=1672549200000&time%5Bend%5D=1683863999999&time%5Bperiod%5D%5B0%5D=1&time%5Bperiod%5D%5B1%5D=week&time%5Bresolution%5D=hour&time%5Btimezone%5D=America%2FToronto
-https://dashboard.viriciti.com/api/v1/report/adl_006?labels%5B0%5D=analyses.time_inservice&time%5Bstart%5D=1672549200000&time%5Bend%5D=1683863999999&time%5Bperiod%5D%5B0%5D=1&time%5Bperiod%5D%5B1%5D=week&time%5Bresolution%5D=hour&time%5Btimezone%5D=America%2FToronto
-https://dashboard.viriciti.com/api/v1/report/adl_006?labels%5B0%5D=analyses.time_not_inservice&time%5Bstart%5D=1672549200000&time%5Bend%5D=1683863999999&time%5Bperiod%5D%5B0%5D=1&time%5Bperiod%5D%5B1%5D=week&time%5Bresolution%5D=hour&time%5Btimezone%5D=America%2FToronto
-https://dashboard.viriciti.com/api/v1/report/adl_006?labels%5B0%5D=analyses.time_in_area&time%5Bstart%5D=1672549200000&time%5Bend%5D=1683863999999&time%5Bperiod%5D%5B0%5D=1&time%5Bperiod%5D%5B1%5D=week&time%5Bresolution%5D=hour&time%5Btimezone%5D=America%2FToronto
-https://dashboard.viriciti.com/api/v1/report/adl_006?labels%5B0%5D=analyses.time_driving&time%5Bstart%5D=1672549200000&time%5Bend%5D=1683863999999&time%5Bperiod%5D%5B0%5D=1&time%5Bperiod%5D%5B1%5D=week&time%5Bresolution%5D=hour&time%5Btimezone%5D=America%2FToronto
-https://dashboard.viriciti.com/api/v1/report/adl_006?labels%5B0%5D=analyses.distance_in_area&time%5Bstart%5D=1672549200000&time%5Bend%5D=1683863999999&time%5Bperiod%5D%5B0%5D=1&time%5Bperiod%5D%5B1%5D=week&time%5Bresolution%5D=hour&time%5Btimezone%5D=America%2FToronto
-https://dashboard.viriciti.com/api/v1/report/adl_006?labels%5B0%5D=analyses.fuel_used&time%5Bstart%5D=1672549200000&time%5Bend%5D=1683863999999&time%5Bperiod%5D%5B0%5D=1&time%5Bperiod%5D%5B1%5D=week&time%5Bresolution%5D=hour&time%5Btimezone%5D=America%2FToronto
-https://dashboard.viriciti.com/api/v1/report/adl_006?labels%5B0%5D=analyses.time_used&time%5Bstart%5D=1672549200000&time%5Bend%5D=1683863999999&time%5Bperiod%5D%5B0%5D=1&time%5Bperiod%5D%5B1%5D=week&time%5Bresolution%5D=hour&time%5Btimezone%5D=America%2FToronto
-https://dashboard.viriciti.com/api/v1/report/adl_006?labels%5B0%5D=analyses.fuel_used_driving&time%5Bstart%5D=1672549200000&time%5Bend%5D=1683863999999&time%5Bperiod%5D%5B0%5D=1&time%5Bperiod%5D%5B1%5D=week&time%5Bresolution%5D=hour&time%5Btimezone%5D=America%2FToronto
-https://dashboard.viriciti.com/api/v1/report/adl_006?labels%5B0%5D=analyses.fuel_used_idling&time%5Bstart%5D=1672549200000&time%5Bend%5D=1683863999999&time%5Bperiod%5D%5B0%5D=1&time%5Bperiod%5D%5B1%5D=week&time%5Bresolution%5D=hour&time%5Btimezone%5D=America%2FToronto
-https://dashboard.viriciti.com/api/v1/report/adl_006?labels%5B0%5D=analyses.fuel_used_inservice&time%5Bstart%5D=1672549200000&time%5Bend%5D=1683863999999&time%5Bperiod%5D%5B0%5D=1&time%5Bperiod%5D%5B1%5D=week&time%5Bresolution%5D=hour&time%5Btimezone%5D=America%2FToronto
-https://dashboard.viriciti.com/api/v1/report/adl_006?labels%5B0%5D=analyses.fuel_used_not_inservice&time%5Bstart%5D=1672549200000&time%5Bend%5D=1683863999999&time%5Bperiod%5D%5B0%5D=1&time%5Bperiod%5D%5B1%5D=week&time%5Bresolution%5D=hour&time%5Btimezone%5D=America%2FToronto
 
 
 
