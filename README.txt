@@ -1,4 +1,4 @@
-**Electric Vehicle Bus Battery Monitoring ETL**
+## Electric Vehicle Bus Battery Monitoring ETL
 
 The Python-based ETL pipeline is scheduled to run daily at 9:00 AM through the Windows Task Scheduler and a bat file. Its primary objective is to fetch vendor data (ChargePoint) regarding electric vehicle performance and conduct calculations to update an engineer's Excel tracking sheet. This pipeline was developed to seamlessly integrate with existing systems like the vehicle dispatch system (CAD/AVL) via Oracle Database. By leveraging trip start-end time data, it accurately computes performance metrics within trip timeframes.
 
